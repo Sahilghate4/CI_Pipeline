@@ -2,32 +2,27 @@ pipeline {
     agent any
 
     stages {
-
-        stage('Build Docker Image') {
+        stage('Clone Code') {
             steps {
-                sh 'docker build -t event-app .'
+                echo 'Code already checked out by Jenkins'
             }
         }
 
-        stage('Run Tests') {
+        stage('Build') {
             steps {
-                sh 'python3 -m unittest test_app.py'
+                sh '''
+                python3 -m venv venv
+                venv/bin/pip install -r requirements.txt
+                '''
             }
         }
 
-        stage('Run Container') {
+        stage('Test') {
             steps {
-                sh 'docker run -d -p 5000:5000 event-app'
+                sh '''
+                venv/bin/python -m unittest test_app.py
+                '''
             }
-        }
-    }
-
-    post {
-        success {
-            echo 'Build Successful ✅'
-        }
-        failure {
-            echo 'Build Failed ❌'
         }
     }
 }
